@@ -1,17 +1,15 @@
-using Plots, JuMP, Gurobi, HiGHS
+using Plots, JuMP, Gurobi, HiGHS, Gurobi
 
 function Q9b()
-    # Parâmetros dos ativos
-    μA = 0.10     # Retorno esperado do Ativo A
-    μM = 0.24     # Retorno esperado do Ativo de Mercado
-    σA = 0.28     # Desvio-padrão do Ativo A
-    σM = 0.32     # Desvio-padrão do Ativo Mercado
-    ρAM = 0.254   # Correlação entre os ativos
 
-    # Intervalo de alocação: x ∈ [-1.0, 2.0]
+    μA = 0.10     
+    μM = 0.24     
+    σA = 0.28     
+    σM = 0.32     
+    ρAM = 0.254   
+
     xs = -1.0:0.01:2.0
 
-    # Calcula os pontos (σ, μ)
     μC = Float64[]
     σC = Float64[]
 
@@ -24,11 +22,11 @@ function Q9b()
         push!(σC, σ)
     end
 
-    # Combinar e ordenar por risco
-    carteiras = collect(zip(σC, μC))
-    sort!(carteiras, by = x -> x[1])  # Ordena por risco (σ)
 
-    # Filtra apenas pontos eficientes (retorno crescente com risco)
+    carteiras = collect(zip(σC, μC))
+    sort!(carteiras, by = x -> x[1])  
+
+
     σ_efficient = Float64[]
     μ_efficient = Float64[]
     max_μ = -Inf
@@ -41,7 +39,7 @@ function Q9b()
         end
     end
 
-    # Plot completo
+
     p = plot(σC, μC,
         color=:gray, label="Todas as carteiras", lw=1, alpha=0.4,
         xlabel="Risco (Desvio-Padrão)",
@@ -50,7 +48,6 @@ function Q9b()
         legend=:topleft,
         grid=true)
 
-    # Fronteira eficiente (parte de cima apenas)
     plot!(σ_efficient, μ_efficient,
         color=:green, lw=2, label="Fronteira Eficiente", marker=:circle)
 
@@ -61,26 +58,23 @@ end
 
 function Q9c(p)
 
-    # Parâmetros
+
     σA = 0.28
     σM = 0.32
     ρAM = 0.254
 
-    # Criação do modelo
+
     model = Model(Gurobi.Optimizer)
 
-    @variable(model, -1 <= x <= 2)  # fração no Ativo Mercado
+    @variable(model, -1 <= x <= 2)  
 
-    # Variância da carteira como função de x
     @objective(model, Min, x^2 * σM^2 + (1 - x)^2 * σA^2 + 2 * x * (1 - x) * ρAM * σA * σM)
 
     optimize!(model)
 
-    # Recuperar a solução ótima
     x_opt = value(x)
     σ_opt = sqrt(x_opt^2 * σM^2 + (1 - x_opt)^2 * σA^2 + 2 * x_opt * (1 - x_opt) * ρAM * σA * σM)
 
-    # Retornos esperados
     μA = 0.10
     μM = 0.24
     μ_opt = x_opt * μM + (1 - x_opt) * μA
@@ -93,16 +87,13 @@ function Q9c(p)
 end
 
 function Q9f()
-    # Parâmetros dos ativos
-    μM = 0.24     # Retorno esperado do Ativo de Mercado
-    σf = 0.00     # Desvio-padrão do Ativo livre de Risco
-    σM = 0.32     # Desvio-padrão do Ativo Mercado
-    rf = 0.06     # Retorno fixo
+    μM = 0.24     
+    σf = 0.00     
+    σM = 0.32     
+    rf = 0.06     
 
-    # Intervalo de alocação: x ∈ [-1.0, 2.0]
     xs = -1.0:0.01:2.0
 
-    # Calcula os pontos (σ, μ)
     μC = Float64[]
     σC = Float64[]
 
@@ -114,11 +105,10 @@ function Q9f()
         push!(σC, σ)
     end
 
-    # Combinar e ordenar por risco
-    carteiras = collect(zip(σC, μC))
-    sort!(carteiras, by = x -> x[1])  # Ordena por risco (σ)
 
-    # Filtra apenas pontos eficientes (retorno crescente com risco)
+    carteiras = collect(zip(σC, μC))
+    sort!(carteiras, by = x -> x[1])  
+
     σ_efficient = Float64[]
     μ_efficient = Float64[]
     max_μ = -Inf
@@ -131,7 +121,6 @@ function Q9f()
         end
     end
 
-    # Plot completo
     p = plot(σC, μC,
         color=:gray, label="Todas as carteiras", lw=1, alpha=0.4,
         xlabel="Risco (Desvio-Padrão)",
@@ -140,7 +129,6 @@ function Q9f()
         legend=:topleft,
         grid=true)
 
-    # Fronteira eficiente (parte de cima apenas)
     plot!(σ_efficient, μ_efficient,
         color=:green, lw=2, label="Fronteira Eficiente", marker=:circle)
 
@@ -151,24 +139,19 @@ end
 
 function Q9g(p)
 
-    # Parâmetros
     σM = 0.32
 
-    # Criação do modelo
     model = Model(Gurobi.Optimizer)
 
-    @variable(model, -1 <= x <= 2)  # fração no Ativo Mercado
+    @variable(model, -1 <= x <= 2) 
 
-    # Variância da carteira como função de x
     @objective(model, Min, x^2*σM^2)
 
     optimize!(model)
 
-    # Recuperar a solução ótima
     x_opt = value(x)
     σ_opt = sqrt(x_opt^2 * σM^2)
 
-    # Retornos esperados
     rf = 0.06
     μM = 0.24
     μ_opt = x_opt * μM + (1 - x_opt) * rf
@@ -181,12 +164,12 @@ function Q9g(p)
 end
 
 function main()
-    #println("==============================\n")
-    #println("Questão 9, letra b)")
-    #p = Q9b()
-    #println("==============================\n")
-    #println("Questão 9, letra c)")
-    #Q9c(p)
+    println("==============================\n")
+    println("Questão 9, letra b)")
+    p = Q9b()
+    println("==============================\n")
+    println("Questão 9, letra c)")
+    Q9c(p)
     println("==============================\n")
     println("Questão 9, letra f)")
     p = Q9f()

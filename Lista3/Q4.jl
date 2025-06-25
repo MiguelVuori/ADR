@@ -3,15 +3,15 @@ using JuMP, HiGHS, Random, Distributions, CSV, DataFrames, Gurobi
 function Q4c(d,p)
     # ======================== Dados do Problema ======================== #
 
-    c1_exp = 50        # Custo de expansão do gerador 1 (R$/MWh)
-    c2_exp = 100       # Custo de expansão do gerador 2 (R$/MWh)
+    c1_exp = 50        
+    c2_exp = 100       
 
-    c1_var = 100       # Custo variável do gerador 1 (R$/MWh)
-    c2_var = 150       # Custo variável do gerador 2 (R$/MWh)
+    c1_var = 100       
+    c2_var = 150       
 
-    P1 = 5             # Capacidade inicial do gerador 1
-    P2 = 10            # Capacidade inicial do gerador 2
-    limite_exp2 = 30   # Limite de expansão para gerador 2
+    P1 = 5             
+    P2 = 10            
+    limite_exp2 = 30   
 
     # ======================== Cenários Amostrados ======================== #
 
@@ -28,12 +28,12 @@ function Q4c(d,p)
     ExpansionProb = Model(Gurobi.Optimizer);
 
     # ======== Variáveis de Primeiro Estágio (Expansão) ======== #
-    @variable(ExpansionProb, x1 >= 0);                  # Expansão do gerador 1
-    @variable(ExpansionProb, 0 <= x2 <= limite_exp2);   # Expansão do gerador 2
+    @variable(ExpansionProb, x1 >= 0);                  
+    @variable(ExpansionProb, 0 <= x2 <= limite_exp2);
 
     # ======== Variáveis de Segundo Estágio (Operação por cenário) ======== #
-    @variable(ExpansionProb, g1[Ω] >= 0);   # Geração do gerador 1
-    @variable(ExpansionProb, g2[Ω] >= 0);   # Geração do gerador 2
+    @variable(ExpansionProb, g1[Ω] >= 0);   
+    @variable(ExpansionProb, g2[Ω] >= 0);  
 
     # ======== Restrições por Cenário ======== #
     @constraint(ExpansionProb, Demand[ω in Ω], g1[ω] + g2[ω] == d[ω]);
@@ -70,19 +70,19 @@ function Q4d(d, p)
     x1_opt, x2_opt = Q4c(d,p)
     # ======================== Dados do Problema ======================== #
 
-    c1_exp = 50;     c2_exp = 100;      # Custo de expansão (R$/MWh)
-    c1_var = 100;    c2_var = 150;      # Custo variável (R$/MWh)
-    P1 = 5;          P2 = 10;           # Capacidade instalada
+    c1_exp = 50;     c2_exp = 100;      
+    c1_var = 100;    c2_var = 150;      
+    P1 = 5;          P2 = 10;           
     limite_exp2 = 30;
 
     # Barras (nós) e linhas (arestas)
-    N = [1, 2, 3]                                   # Conjunto de barras
-    A = [(1,2), (1,3), (2,3)]                       # Conjunto de linhas
-    F = Dict((1,2)=>5.0, (1,3)=>10.0, (2,3)=>35.0)   # Limites de fluxo
+    N = [1, 2, 3]                                   
+    A = [(1,2), (1,3), (2,3)]                       
+    F = Dict((1,2)=>5.0, (1,3)=>10.0, (2,3)=>35.0)
 
     # ======================== Cenários ======================== #
 
-    Ω = 1:length(d);    # Conjunto de cenários
+    Ω = 1:length(d);    
 
     # ======================== Modelo ======================== #
 
@@ -91,9 +91,9 @@ function Q4d(d, p)
     # ======== Variáveis de Primeiro Estágio ======== #
 
     # ======== Variáveis de Segundo Estágio ======== #
-    @variable(model, g1[Ω] >= 0)                    # Geração G1
-    @variable(model, g2[Ω] >= 0)                    # Geração G2
-    @variable(model, f[Ω, A])                       # Fluxo nas linhas (pode ser negativo)
+    @variable(model, g1[Ω] >= 0)                    
+    @variable(model, g2[Ω] >= 0)                    
+    @variable(model, f[Ω, A])                       
 
     # ======== Restrições ======== #
     for ω in Ω
@@ -107,13 +107,13 @@ function Q4d(d, p)
         end
 
         # Balanço de energia nas barras
-        # Barra 1: geração - saída = 0
+        
         @constraint(model, g1[ω] - f[ω,(1,2)] - f[ω,(1,3)] == 0)
 
-        # Barra 2: geração + entrada/saída
+        
         @constraint(model, g2[ω] + f[ω,(1,2)] - f[ω,(2,3)] == 0)
 
-        # Barra 3: consumo = entrada líquida
+        
         @constraint(model, f[ω,(1,3)] + f[ω,(2,3)] == d[ω])
     end
 
@@ -136,32 +136,32 @@ function Q4f(d, p)
 
     # ======================== Dados do Problema ======================== #
 
-    c1_exp = 50;     c2_exp = 100;      # Custo de expansão (R$/MWh)
-    c1_var = 100;    c2_var = 150;      # Custo variável (R$/MWh)
-    P1 = 5;          P2 = 10;           # Capacidade instalada
+    c1_exp = 50;     c2_exp = 100;      
+    c1_var = 100;    c2_var = 150;      
+    P1 = 5;          P2 = 10;           
     limite_exp2 = 30;
 
     # Barras (nós) e linhas (arestas)
-    N = [1, 2, 3]                                   # Conjunto de barras
-    A = [(1,2), (1,3), (2,3)]                       # Conjunto de linhas
-    F = Dict((1,2)=>5.0, (1,3)=>10.0, (2,3)=>35.0)   # Limites de fluxo
+    N = [1, 2, 3]                                   
+    A = [(1,2), (1,3), (2,3)]                       
+    F = Dict((1,2)=>5.0, (1,3)=>10.0, (2,3)=>35.0)   
 
     # ======================== Cenários ======================== #
 
-    Ω = 1:length(d);    # Conjunto de cenários
+    Ω = 1:length(d);    
 
     # ======================== Modelo ======================== #
 
     model = Model(Gurobi.Optimizer)
 
     # ======== Variáveis de Primeiro Estágio ======== #
-    @variable(model, x1 >= 0)                       # Expansão G1
-    @variable(model, 0 <= x2 <= limite_exp2)        # Expansão G2
+    @variable(model, x1 >= 0)                       
+    @variable(model, 0 <= x2 <= limite_exp2)        
 
     # ======== Variáveis de Segundo Estágio ======== #
-    @variable(model, g1[Ω] >= 0)                    # Geração G1
-    @variable(model, g2[Ω] >= 0)                    # Geração G2
-    @variable(model, f[Ω, A])                       # Fluxo nas linhas (pode ser negativo)
+    @variable(model, g1[Ω] >= 0)                    
+    @variable(model, g2[Ω] >= 0)                    
+    @variable(model, f[Ω, A])                       
 
     # ======== Restrições ======== #
     for ω in Ω
@@ -215,15 +215,15 @@ function main()
 
     # ============================================================================ #
     p = ones(length(d))*(1/length(d));
-    #println("==============================\n")
-    #println("Questão 4, letra c)")
-    #Q4c(d,p)
+    println("==============================\n")
+    println("Questão 4, letra c)")
+    Q4c(d,p)
     println("==============================\n")
     println("Questão 4, letra d)")
     Q4d(d,p)
-    #println("==============================\n")
-    #println("Questão 4, letra f)")
-    #Q4f(d,p)
+    println("==============================\n")
+    println("Questão 4, letra f)")
+    Q4f(d,p)
 
 end
 main()

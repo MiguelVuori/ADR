@@ -6,7 +6,7 @@ using Distributions, Random
 using Plots
 using JuMP
 using GLPK              # Solver Gratuito de Programação Linear & Inteira Mista - https://github.com/jump-dev/GLPK.jl | https://www.gnu.org/software/glpk/
-using HiGHS
+using HiGHS, Gurobi
 
 # ======================     Parâmetros do Problema   ======================== #
 function Q1c()
@@ -232,8 +232,10 @@ function Q1f()
     Random.seed!(1);
     ds  = rand(Uniform(dmin, dmax), nCenarios);
     receitasOtimas = Float64[]
+
+    gurobi_env = Gurobi.Env()
     for d in ds
-        NewsVendorProb = Model(HiGHS.Optimizer);
+        NewsVendorProb = Model(() -> Gurobi.Optimizer(gurobi_env));
 
         # ========== Variáveis de Decisão ========== #
 
@@ -290,7 +292,7 @@ function Q1g()
 
     # ========================     Sampling Process     ========================== #
 
-    nCenarios = 10000;                   # Number of Scenarios
+    nCenarios = 100000;                   # Number of Scenarios
     Ω = 1:nCenarios;                    # Set of Scenarios
     p = ones(nCenarios)*(1/nCenarios);  # Equal Probability
 
@@ -304,8 +306,9 @@ function Q1g()
     Random.seed!(1);
     d  = rand(Uniform(dmin, dmax), nCenarios);
 
+    gurobi_env = Gurobi.Env()
 
-    NewsVendorProb = Model(HiGHS.Optimizer);
+    NewsVendorProb = Model(() -> Gurobi.Optimizer(gurobi_env));
 
     # ========== Variáveis de Decisão ========== #
 
@@ -456,9 +459,10 @@ function Q1i()
 
     Random.seed!(1);
     d  = rand(Uniform(dmin, dmax), nCenarios);
-
+    gurobi_env = Gurobi.Env()
+    
     for λ in Λ
-        NewsVendorProb = Model(HiGHS.Optimizer);
+        NewsVendorProb = Model(() -> Gurobi.Optimizer(gurobi_env));
 
         # ========== Variáveis de Decisão ========== #
 
@@ -528,19 +532,19 @@ function Q1i()
 end
 
 function main()
-    #println("Questão 1, letra c)")
-    #Q1c()
-    #println("Questão 1, letra e)")
-    #Q1e()
-    #println("==============================\n")
-    #println("Questão 1, letra f)")
-    #Q1f()
-    #println("==============================\n")
-    #println("Questão 1, letra g)")
-    #Q1g()
-    #println("==============================\n")
-    #println("Questão 1, letra h)")
-    #Q1h()
+    println("Questão 1, letra c)")
+    Q1c()
+    println("Questão 1, letra e)")
+    Q1e()
+    println("==============================\n")
+    println("Questão 1, letra f)")
+    Q1f()
+    println("==============================\n")
+    println("Questão 1, letra g)")
+    Q1g()
+    println("==============================\n")
+    println("Questão 1, letra h)")
+    Q1h()
     println("==============================\n")
     println("Questão 1, letra i)")
     Q1i()
